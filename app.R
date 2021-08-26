@@ -114,7 +114,7 @@ shinyApp(
   )),
   # Server.R
   server = function(input, output) {
-    output$plot <- renderPlot({
+    output$plot1 <- renderPlot({
       # get Input
       Gender.CodeI <- input$Gender.Code
       rural_urban_classI <- input$rural_urban_class
