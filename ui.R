@@ -31,7 +31,7 @@ pop_summary <- fread(file.path(summaryDir, "pop_summary.csv"))
 
 # Define UI for dataset viewer app ----
 #ui <- fluidPage(
-shinyUI(bootstrapPage(
+ui = shinyUI(bootstrapPage(
   # App title ----
   titlePanel("Explore data"),
 
