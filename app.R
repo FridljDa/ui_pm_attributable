@@ -32,7 +32,8 @@ pop_summary <- fread(file.path(summaryDir, "pop_summary.csv"))
 
 # Define server logic to summarize and view selected dataset ----
 shinyServer(function(input, output) {
-  output$plot1 <- renderPlot({
+  #output$main_plot <- renderPlot({
+  output$main_plot <- reactivePlot(width = 400, height = 300, function() {
     # get Input
     Gender.CodeI <- input$Gender.Code
     rural_urban_classI <- input$rural_urban_class
