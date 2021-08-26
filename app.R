@@ -165,4 +165,4 @@ shinyServer <- shinyServer(function(input, output) {
     g_comb
   })
 })
-shinyServer
+return(shinyServer)
