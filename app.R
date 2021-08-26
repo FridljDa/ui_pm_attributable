@@ -10,7 +10,7 @@
 rm(list = ls(all = TRUE))
 
 # load packages, install if missing
-packages <- c("data.table","dplyr", "magrittr","shiny", "ggplot2", "ggpubr", "scales", "rstudioapi") 
+packages <- c("data.table","dplyr", "magrittr","shiny", "ggplot2", "ggpubr", "scales", "here") 
 
 for (p in packages) {
   if (p %in% rownames(installed.packages()) == FALSE) install.packages(p)
@@ -18,16 +18,12 @@ for (p in packages) {
 }
 options(scipen = 10000)
 
-# create data directory, setwd
-h_root <- dirname(rstudioapi::getSourceEditorContext()$path)
-
 #load calculated data
-summaryDir <- file.path(h_root, "data_summary")
-attrBurden <- rbind(fread(file.path(summaryDir, "attr_burd.csv")), 
-                    fread(file.path(summaryDir, "attr_burd_prop.csv")))
-all_burden <- fread(file.path(summaryDir, "all_burd.csv"))
-pm_summ <- fread(file.path(summaryDir, "pm_summary.csv"))
-pop_summary <- fread(file.path(summaryDir, "pop_summary.csv"))
+attrBurden <- rbind(fread(here("data_summary", "attr_burd.csv")), 
+                    fread(here("data_summary", "attr_burd_prop.csv")))
+all_burden <- fread(here("data_summary", "all_burd.csv"))
+pm_summ <- fread(here("data_summary", "pm_summary.csv"))
+pop_summary <- fread(here("data_summary", "pop_summary.csv"))
 
 ##---shiny app---
 shinyApp(
