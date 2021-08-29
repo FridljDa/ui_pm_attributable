@@ -51,7 +51,7 @@ shinyApp(
         selectInput(
           inputId = "rural_urban_class",
           label = "Rural Urban class",
-          choices = c("All",setdiff(unique(all_burden$rural_urban_class),"All"))
+          choices = c("All",setdiff(unique(pop_summary$rural_urban_class),"All"))
         ),
         selectInput(
           inputId = "Region",
