@@ -19,8 +19,11 @@ for (p in packages) {
 options(scipen = 10000)
 
 #load calculated data
-attrBurden <- rbind(fread(here("data_summary", "attr_burd.csv")), 
-                    fread(here("data_summary", "attr_burd_prop.csv")))
+file_list <- list.files(here("data_summary"))
+file_list <- here("data_summary", file_list[grepl("attr_bur", file_list)])
+attrBurden <- lapply(file_list, fread) %>% rbindlist
+rm(file_list)
+
 all_burden <- fread(here("data_summary", "all_burd.csv"))
 pm_summ <- fread(here("data_summary", "pm_summary.csv"))
 pop_summary <- fread(here("data_summary", "pop_summary.csv"))
@@ -56,7 +59,7 @@ shinyApp(
         selectInput(
           inputId = "Region",
           label = "Region",
-          choices = unique(all_burden$Region)
+          choices = c("United States",setdiff(unique(pop_summary$Region),"United States"))
         ),
         selectInput(
           inputId = "measure1",
