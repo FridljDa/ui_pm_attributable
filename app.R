@@ -21,12 +21,17 @@ options(scipen = 10000)
 #load calculated data
 file_list <- list.files(here("data_summary"))
 file_list <- here("data_summary", file_list[grepl("attr_bur", file_list)])
-attrBurden <- lapply(file_list, fread) %>% rbindlist
+attrBurden <- lapply(file_list, fread) %>% rbindlist(use.names = TRUE)
 rm(file_list)
 
 all_burden <- fread(here("data_summary", "all_burd.csv"))
 pm_summ <- fread(here("data_summary", "pm_summary.csv"))
 pop_summary <- fread(here("data_summary", "pop_summary.csv"))
+
+all_burden <- all_burden %>% filter(rural_urban_class != "Unknown")
+attrBurden <- attrBurden %>% filter(rural_urban_class != "Unknown")
+pm_summ <- pm_summ %>% filter(rural_urban_class != "Unknown")
+pop_summary <- pop_summary %>% filter(rural_urban_class != "Unknown")
 
 ##---shiny app---
 shinyApp(
@@ -43,8 +48,8 @@ shinyApp(
         # Input: Selector for choosing dataset ----
         selectInput(
           inputId = "raceOrEduc",
-          label = "Aggregate by race or education?",
-          choices = c("race", "education","nothing")
+          label = "Aggregate by which factor?",
+          choices = c("race", "education","nothing","rural urban class")
         ),
         selectInput(
           inputId = "Gender.Code",
@@ -54,12 +59,12 @@ shinyApp(
         selectInput(
           inputId = "rural_urban_class",
           label = "Rural Urban class",
-          choices = c("All",setdiff(unique(pop_summary$rural_urban_class),"All"))
+          choices = c("All",setdiff(unique(all_burden$rural_urban_class),"All"))
         ),
         selectInput(
           inputId = "Region",
           label = "Region",
-          choices = c("United States",setdiff(unique(pop_summary$Region),"United States"))
+          choices = c("United States",setdiff(unique(all_burden$Region),"United States"))
         ),
         selectInput(
           inputId = "measure1",
@@ -69,7 +74,7 @@ shinyApp(
         selectInput(
           inputId = "measure2",
           label = "rate",
-          choices = unique(all_burden$measure2)
+          choices = c("age-adjusted rate per 100,000",setdiff(unique(all_burden$measure2),"age-adjusted rate per 100,000"))
         ),
         selectInput(
           inputId = "source",
@@ -127,27 +132,26 @@ shinyApp(
       scenarioI <- input$scenario
       
       # filter data accordingly
-      allBurden1 <- all_burden %>% filter(Gender.Code == Gender.CodeI & Region == RegionI & measure1 == measure1I & measure2 == measure2I & source == sourceI & attr == "overall" & rural_urban_classI == rural_urban_class)
-      allBurden2 <- all_burden %>% filter(Gender.Code == Gender.CodeI & Region == RegionI & measure1 == measure1I & measure2 == measure2I & source == sourceI & attr == "total" & rural_urban_classI == rural_urban_class)
-      attrBurden1 <- attrBurden %>% filter(Gender.Code == Gender.CodeI & Region == RegionI & measure1 == measure1I & measure2 == measure2I & source == sourceI & methodI == method & measure3 == "value" & scenarioI == scenario & rural_urban_classI == rural_urban_class)
-      attrBurden2 <- attrBurden %>% filter(Gender.Code == Gender.CodeI & Region == RegionI & measure1 == measure1I & measure2 == measure2I & source == sourceI & methodI == method & measure3 == "prop. of overall burden" & scenarioI == scenario & rural_urban_classI == rural_urban_class)
+      allBurden1 <- all_burden %>% filter(Gender.Code == Gender.CodeI & Region == RegionI & measure1 == measure1I & measure2 == measure2I & source == sourceI & attr == "overall")
+      allBurden2 <- all_burden %>% filter(Gender.Code == Gender.CodeI & Region == RegionI & measure1 == measure1I & measure2 == measure2I & source == sourceI & attr == "total")
+      attrBurden1 <- attrBurden %>% filter(Gender.Code == Gender.CodeI & Region == RegionI & measure1 == measure1I & measure2 == measure2I & source == sourceI & methodI == method & measure3 == "value" & scenarioI == scenario)
+      attrBurden2 <- attrBurden %>% filter(Gender.Code == Gender.CodeI & Region == RegionI & measure1 == measure1I & measure2 == measure2I & source == sourceI & methodI == method & measure3 == "prop. of overall burden" & scenarioI == scenario)
       attrBurden3 <- attrBurden %>% filter(Gender.Code == Gender.CodeI & Region == RegionI & measure1 == measure1I & measure2 == measure2I & source == sourceI & methodI == method 
-                                           & measure3 %in% c("proportion of disparity to Black or African American attributable", "proportion of disparity to lower educational attainment")
-                                           & !(Ethnicity == "All, All Origins" & Education == 666)  & scenarioI == scenario & rural_urban_classI == rural_urban_class)
-      attrBurden4 <- attrBurden %>% filter(Gender.Code == Gender.CodeI & Region == RegionI & measure1 == measure1I & measure2 == measure2I & source == sourceI & methodI == method & measure3 == "prop. of total burden" & scenarioI == scenario & rural_urban_classI == rural_urban_class)
+                                           & !(Ethnicity == "All, All Origins" & Education == 666)  & scenarioI == scenario)
+      attrBurden4 <- attrBurden %>% filter(Gender.Code == Gender.CodeI & Region == RegionI & measure1 == measure1I & measure2 == measure2I & source == sourceI & methodI == method & measure3 == "prop. of total burden" & scenarioI == scenario)
       
-      pm_summ1 <- pm_summ %>% filter(Gender.Code == Gender.CodeI & Region == RegionI & pm_metric == pm_metricI & scenarioI == scenario & rural_urban_classI == rural_urban_class)
-      pop_summary1 <- pop_summary %>% filter(Gender.Code == Gender.CodeI & Region == RegionI & source2 == source2I & rural_urban_classI == rural_urban_class)
+      pm_summ1 <- pm_summ %>% filter(Gender.Code == Gender.CodeI & Region == RegionI & pm_metric == pm_metricI & scenarioI == scenario)
+      pop_summary1 <- pop_summary %>% filter(Gender.Code == Gender.CodeI & Region == RegionI & source2 == source2I)
       
       if (input$raceOrEduc == "race") {
-        allBurden1 <- allBurden1 %>% filter(Education == 666 & Ethnicity != "All, All Origins") 
-        allBurden2 <- allBurden2 %>% filter(Education == 666 & Ethnicity != "All, All Origins")
-        attrBurden1 <- attrBurden1 %>% filter(Education == 666 & Ethnicity != "All, All Origins")
-        attrBurden2 <- attrBurden2 %>% filter(Education == 666 & Ethnicity != "All, All Origins")
-        attrBurden3 <- attrBurden3 %>% filter(Education == 666 & Ethnicity != "All, All Origins")
-        attrBurden4 <- attrBurden4 %>% filter(Education == 666 & Ethnicity != "All, All Origins")
-        pm_summ1 <- pm_summ1 %>% filter(Education == 666 & Ethnicity != "All, All Origins")
-        pop_summary1 <- pop_summary1 %>% filter(Education == 666 & Ethnicity != "All, All Origins")
+        allBurden1 <- allBurden1 %>% filter(Education == 666 & Ethnicity != "All, All Origins"  & rural_urban_classI == rural_urban_class) 
+        allBurden2 <- allBurden2 %>% filter(Education == 666 & Ethnicity != "All, All Origins"  & rural_urban_classI == rural_urban_class)
+        attrBurden1 <- attrBurden1 %>% filter(Education == 666 & Ethnicity != "All, All Origins"  & rural_urban_classI == rural_urban_class)
+        attrBurden2 <- attrBurden2 %>% filter(Education == 666 & Ethnicity != "All, All Origins"  & rural_urban_classI == rural_urban_class)
+        attrBurden3 <- attrBurden3 %>% filter(Education == 666 & Ethnicity != "All, All Origins"  & rural_urban_classI == rural_urban_class & measure3 =="proportion of disparity to Black or African American attributable")
+        attrBurden4 <- attrBurden4 %>% filter(Education == 666 & Ethnicity != "All, All Origins" & rural_urban_classI == rural_urban_class)
+        pm_summ1 <- pm_summ1 %>% filter(Education == 666 & Ethnicity != "All, All Origins" & rural_urban_classI == rural_urban_class)
+        pop_summary1 <- pop_summary1 %>% filter(Education == 666 & Ethnicity != "All, All Origins" & rural_urban_classI == rural_urban_class)
         
         g1 <- ggplot(allBurden1, aes(x = Year, y = overall_value, color = Ethnicity))
         g2 <- ggplot(allBurden2, aes(x = Year, y = overall_value, color = Ethnicity))
@@ -157,15 +161,24 @@ shinyApp(
         g6 <- ggplot(pop_summary1, aes(x = Year, y = Population, color = Ethnicity))
         g7 <- ggplot(attrBurden3, aes(x = Year, y = mean, color = Ethnicity))
         g8 <- ggplot(attrBurden4, aes(x = Year, y = mean, color = Ethnicity))
+        
+        group.colors <- hue_pal()(6)
+        names(group.colors) <- c("White, Not Hispanic or Latino",
+                                 "White, Hispanic or Latino",
+                                 "White, All Origins",
+                                 "Black or African American",
+                                 "Asian or Pacific Islander",
+                                 "American Indian or Alaska Native"
+        )
       } else if(input$raceOrEduc == "education"){
-        allBurden1 <- allBurden1 %>% filter(Education != 666 & Ethnicity == "All, All Origins")
-        allBurden2 <- allBurden2 %>% filter(Education != 666 & Ethnicity == "All, All Origins")
-        attrBurden1 <- attrBurden1 %>% filter(Education != 666 & Ethnicity == "All, All Origins")
-        attrBurden2 <- attrBurden2 %>% filter(Education != 666 & Ethnicity == "All, All Origins")
-        attrBurden3 <- attrBurden3 %>% filter(Education != 666 & Ethnicity == "All, All Origins")
-        attrBurden4 <- attrBurden4 %>% filter(Education != 666 & Ethnicity == "All, All Origins")
-        pm_summ1 <- pm_summ1 %>% filter(Education != 666 & Ethnicity == "All, All Origins")
-        pop_summary1 <- pop_summary1 %>% filter(Education != 666 & Ethnicity == "All, All Origins")
+        allBurden1 <- allBurden1 %>% filter(Education != 666 & Ethnicity == "All, All Origins" & rural_urban_classI == rural_urban_class)
+        allBurden2 <- allBurden2 %>% filter(Education != 666 & Ethnicity == "All, All Origins" & rural_urban_classI == rural_urban_class)
+        attrBurden1 <- attrBurden1 %>% filter(Education != 666 & Ethnicity == "All, All Origins" & rural_urban_classI == rural_urban_class)
+        attrBurden2 <- attrBurden2 %>% filter(Education != 666 & Ethnicity == "All, All Origins" & rural_urban_classI == rural_urban_class)
+        attrBurden3 <- attrBurden3 %>% filter(Education != 666 & Ethnicity == "All, All Origins" & rural_urban_classI == rural_urban_class & measure3 =="proportion of disparity to lower educational attainment")
+        attrBurden4 <- attrBurden4 %>% filter(Education != 666 & Ethnicity == "All, All Origins" & rural_urban_classI == rural_urban_class)
+        pm_summ1 <- pm_summ1 %>% filter(Education != 666 & Ethnicity == "All, All Origins" & rural_urban_classI == rural_urban_class)
+        pop_summary1 <- pop_summary1 %>% filter(Education != 666 & Ethnicity == "All, All Origins" & rural_urban_classI == rural_urban_class)
         
         g1 <- ggplot(allBurden1, aes(x = Year, y = overall_value, color = Education))
         g2 <- ggplot(allBurden2, aes(x = Year, y = overall_value, color = Education))
@@ -175,15 +188,21 @@ shinyApp(
         g6 <- ggplot(pop_summary1, aes(x = Year, y = Population, color = Education))
         g7 <- ggplot(attrBurden3, aes(x = Year, y = mean, color = Education))
         g8 <- ggplot(attrBurden4, aes(x = Year, y = mean, color = Education))
+        
+        group.colors <- hue_pal()(3)
+        names(group.colors) <- c("high school graduate or lower",
+                                 "some college education but no 4-year college degree",
+                                 "4-year college graduate or higher"
+                                )
       }else if(input$raceOrEduc == "nothing"){
-        allBurden1 <- allBurden1 %>% filter(Education == 666 & Ethnicity == "All, All Origins")
-        allBurden2 <- allBurden2 %>% filter(Education == 666 & Ethnicity == "All, All Origins")
-        attrBurden1 <- attrBurden1 %>% filter(Education == 666 & Ethnicity == "All, All Origins")
-        attrBurden2 <- attrBurden2 %>% filter(Education == 666 & Ethnicity == "All, All Origins")
-        attrBurden3 <- attrBurden3 %>% filter(Education == 666 & Ethnicity == "All, All Origins")
-        attrBurden4 <- attrBurden4 %>% filter(Education == 666 & Ethnicity == "All, All Origins")
-        pm_summ1 <- pm_summ1 %>% filter(Education == 666 & Ethnicity == "All, All Origins")
-        pop_summary1 <- pop_summary1 %>% filter(Education == 666 & Ethnicity == "All, All Origins")
+        allBurden1 <- allBurden1 %>% filter(Education == 666 & Ethnicity == "All, All Origins" & rural_urban_classI == rural_urban_class)
+        allBurden2 <- allBurden2 %>% filter(Education == 666 & Ethnicity == "All, All Origins" & rural_urban_classI == rural_urban_class)
+        attrBurden1 <- attrBurden1 %>% filter(Education == 666 & Ethnicity == "All, All Origins" & rural_urban_classI == rural_urban_class)
+        attrBurden2 <- attrBurden2 %>% filter(Education == 666 & Ethnicity == "All, All Origins" & rural_urban_classI == rural_urban_class)
+        attrBurden3 <- attrBurden3 %>% filter(FALSE)
+        attrBurden4 <- attrBurden4 %>% filter(Education == 666 & Ethnicity == "All, All Origins" & rural_urban_classI == rural_urban_class)
+        pm_summ1 <- pm_summ1 %>% filter(Education == 666 & Ethnicity == "All, All Origins" & rural_urban_classI == rural_urban_class)
+        pop_summary1 <- pop_summary1 %>% filter(Education == 666 & Ethnicity == "All, All Origins" & rural_urban_classI == rural_urban_class)
         
         g1 <- ggplot(allBurden1, aes(x = Year, y = overall_value))
         g2 <- ggplot(allBurden2, aes(x = Year, y = overall_value))
@@ -193,6 +212,32 @@ shinyApp(
         g6 <- ggplot(pop_summary1, aes(x = Year, y = Population))
         g7 <- ggplot(attrBurden3, aes(x = Year, y = mean))
         g8 <- ggplot(attrBurden4, aes(x = Year, y = mean))
+        
+      }else if(input$raceOrEduc == "rural urban class"){
+        allBurden1 <- allBurden1 %>% filter(Education == 666 & Ethnicity == "All, All Origins" & rural_urban_class != "All" & Year >= 2000)
+        allBurden2 <- allBurden2 %>% filter(Education == 666 & Ethnicity == "All, All Origins" & rural_urban_class != "All" & Year >= 2000)
+        attrBurden1 <- attrBurden1 %>% filter(Education == 666 & Ethnicity == "All, All Origins" & rural_urban_class != "All" & Year >= 2000)
+        attrBurden2 <- attrBurden2 %>% filter(Education == 666 & Ethnicity == "All, All Origins" & rural_urban_class != "All" & Year >= 2000)
+        attrBurden3 <- attrBurden3 %>% filter(Education == 666 & Ethnicity == "All, All Origins" & rural_urban_class != "All" & measure3 =="proportion of disparity to non-metro" & Year >= 2000)
+        attrBurden4 <- attrBurden4 %>% filter(Education == 666 & Ethnicity == "All, All Origins" & rural_urban_class != "All" & Year >= 2000)
+        pm_summ1 <- pm_summ1 %>% filter(Education == 666 & Ethnicity == "All, All Origins" & rural_urban_class != "All"& Year >= 2000)
+        pop_summary1 <- pop_summary1 %>% filter(Education == 666 & Ethnicity == "All, All Origins" & rural_urban_class != "All" & Year >= 2000)
+        
+        g1 <- ggplot(allBurden1, aes(x = Year, y = overall_value, color = rural_urban_class))
+        g2 <- ggplot(allBurden2, aes(x = Year, y = overall_value, color = rural_urban_class))
+        g3 <- ggplot(attrBurden1, aes(x = Year, y = mean, color = rural_urban_class))
+        g4 <- ggplot(attrBurden2, aes(x = Year, y = mean, color = rural_urban_class))
+        g5 <- ggplot(pm_summ1, aes(x = Year, y = value, color = rural_urban_class))
+        g6 <- ggplot(pop_summary1, aes(x = Year, y = Population, color = rural_urban_class))
+        g7 <- ggplot(attrBurden3, aes(x = Year, y = mean, color = rural_urban_class))
+        g8 <- ggplot(attrBurden4, aes(x = Year, y = mean, color = rural_urban_class))
+        
+        group.colors <- c(hue_pal()(3))
+        names(group.colors) <- c("large metro",
+                                 "small-medium metro",
+                                 "non metro"
+                                
+        )
       }
       
       
@@ -212,30 +257,18 @@ shinyApp(
         g3 <- g3 + geom_ribbon(aes(ymin = lower, ymax = upper), linetype = 0, alpha = 0.1)
         g4 <- g4 + geom_ribbon(aes(ymin = lower, ymax = upper), linetype = 0, alpha = 0.1)
       }
-      #https://stackoverflow.com/questions/17180115/manually-setting-group-colors-for-ggplot2
-      group.colors <- c(hue_pal()(7),hue_pal()(4))
-      names(group.colors) <- c("White, Not Hispanic or Latino",
-                               "White, Hispanic or Latino",
-                               "White, All Origins",
-                               "Black or African American",
-                               "Asian or Pacific Islander",
-                               "American Indian or Alaska Native",
-                               "All, All Origins",
-                               #TODO
-                               "high school graduate or lower",
-                               "some college education but no 4-year college degree",
-                               "4-year college graduate or higher",
-                               "All Education"
-      )
       
-      g1 <- g1+  scale_colour_manual(values=group.colors)
-      g2 <- g2+  scale_colour_manual(values=group.colors)
-      g3 <- g3+  scale_colour_manual(values=group.colors)
-      g4 <- g4+  scale_colour_manual(values=group.colors)
-      g5 <- g5+  scale_colour_manual(values=group.colors)
-      g6 <- g6+  scale_colour_manual(values=group.colors)
-      g7 <- g7+  scale_colour_manual(values=group.colors)
-      g8 <- g8+  scale_colour_manual(values=group.colors)
+      if(FALSE){ #TODO
+        g1 <- g1+  scale_colour_manual(values=group.colors)
+        g2 <- g2+  scale_colour_manual(values=group.colors)
+        g3 <- g3+  scale_colour_manual(values=group.colors)
+        g4 <- g4+  scale_colour_manual(values=group.colors)
+        g5 <- g5+  scale_colour_manual(values=group.colors)
+        g6 <- g6+  scale_colour_manual(values=group.colors)
+        g7 <- g7+  scale_colour_manual(values=group.colors)
+        g8 <- g8+  scale_colour_manual(values=group.colors)
+      }
+
       
       g_comb <- ggarrange(g1, #g2, 
                           g3, g4, g5, g6, g7,#g8,
