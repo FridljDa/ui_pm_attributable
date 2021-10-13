@@ -143,6 +143,17 @@ shinyApp(
       pm_summ1 <- pm_summ %>% filter(Gender.Code == Gender.CodeI & Region == RegionI & pm_metric == pm_metricI & scenarioI == scenario)
       pop_summary1 <- pop_summary %>% filter(Gender.Code == Gender.CodeI & Region == RegionI & source2 == source2I)
       
+      if(rural_urban_classI != "All"){
+        allBurden1 <- allBurden1 %>% filter(Year >= 2000)
+        allBurden2 <- allBurden2 %>% filter(Year >= 2000)
+        attrBurden1 <- attrBurden1 %>% filter(Year >= 2000)
+        attrBurden2 <- attrBurden2 %>% filter(Year >= 2000)
+        attrBurden3 <- attrBurden3 %>% filter(Year >= 2000)
+        attrBurden4 <- attrBurden4 %>% filter(Year >= 2000)
+        pm_summ1 <- pm_summ1 %>% filter(Year >= 2000)
+        pop_summary1 <- pop_summary1 %>% filter(Year >= 2000)
+      }
+      
       if (input$raceOrEduc == "race") {
         allBurden1 <- allBurden1 %>% filter(Education == 666 & Ethnicity != "All, All Origins"  & rural_urban_classI == rural_urban_class) 
         allBurden2 <- allBurden2 %>% filter(Education == 666 & Ethnicity != "All, All Origins"  & rural_urban_classI == rural_urban_class)
@@ -239,7 +250,6 @@ shinyApp(
                                 
         )
       }
-      
       
       g1 <- g1 + geom_line(size = 1) + xlab("Year") + ylab(paste0(measure1I, ", ", measure2I)) +scale_x_continuous(breaks= pretty_breaks())+ ylim(0, NA)   + ggtitle("all-cause burden")
       g2 <- g2 + geom_line(size = 1) + xlab("Year") + ylab(paste0(measure1I, ", ", measure2I)) +scale_x_continuous(breaks= pretty_breaks())+ ylim(0, NA)  + ggtitle("total burden from causes associated with PM2.5 exposure ",
