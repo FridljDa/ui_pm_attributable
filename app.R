@@ -159,7 +159,10 @@ shinyApp(
         allBurden2 <- allBurden2 %>% filter(Education == 666 & Ethnicity != "All, All Origins"  & rural_urban_classI == rural_urban_class)
         attrBurden1 <- attrBurden1 %>% filter(Education == 666 & Ethnicity != "All, All Origins"  & rural_urban_classI == rural_urban_class)
         attrBurden2 <- attrBurden2 %>% filter(Education == 666 & Ethnicity != "All, All Origins"  & rural_urban_classI == rural_urban_class)
-        attrBurden3 <- attrBurden3 %>% filter(Education == 666 & Ethnicity != "All, All Origins"  & rural_urban_classI == rural_urban_class & measure3 =="proportion of disparity to Black or African American attributable")
+        attrBurden3 <- attrBurden3 %>% filter(Education == 666 & Ethnicity != "All, All Origins"  & rural_urban_classI == rural_urban_class 
+                                              & measure3 =="proportion of disparity to Black or African American attributable"
+                                              #& measure3 =="proportion of disparity to average"
+                                              )
         attrBurden4 <- attrBurden4 %>% filter(Education == 666 & Ethnicity != "All, All Origins" & rural_urban_classI == rural_urban_class)
         pm_summ1 <- pm_summ1 %>% filter(Education == 666 & Ethnicity != "All, All Origins" & rural_urban_classI == rural_urban_class)
         pop_summary1 <- pop_summary1 %>% filter(Education == 666 & Ethnicity != "All, All Origins" & rural_urban_classI == rural_urban_class)
