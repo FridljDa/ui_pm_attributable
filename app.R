@@ -271,7 +271,7 @@ shinyApp(
         g4 <- g4 + geom_ribbon(aes(ymin = lower, ymax = upper), linetype = 0, alpha = 0.1)
       }
       
-      #if(FALSE){ #TODO
+      if(input$raceOrEduc != "nothing"){ #TODO
         g1 <- g1+  scale_colour_manual(values=group.colors)
         g2 <- g2+  scale_colour_manual(values=group.colors)
         g3 <- g3+  scale_colour_manual(values=group.colors)
@@ -280,7 +280,7 @@ shinyApp(
         g6 <- g6+  scale_colour_manual(values=group.colors)
         g7 <- g7+  scale_colour_manual(values=group.colors)
         g8 <- g8+  scale_colour_manual(values=group.colors)
-      #}
+      }
       
       g_comb <- ggarrange(g1, #g2, 
                           g3, g4, g5, g6, g7,#g8,
