@@ -159,7 +159,10 @@ shinyApp(
         allBurden2 <- allBurden2 %>% filter(Education == 666 & Ethnicity != "All, All Origins"  & rural_urban_classI == rural_urban_class)
         attrBurden1 <- attrBurden1 %>% filter(Education == 666 & Ethnicity != "All, All Origins"  & rural_urban_classI == rural_urban_class)
         attrBurden2 <- attrBurden2 %>% filter(Education == 666 & Ethnicity != "All, All Origins"  & rural_urban_classI == rural_urban_class)
-        attrBurden3 <- attrBurden3 %>% filter(Education == 666 & Ethnicity != "All, All Origins"  & rural_urban_classI == rural_urban_class & measure3 =="proportion of disparity to Black or African American attributable")
+        attrBurden3 <- attrBurden3 %>% filter(Education == 666 & Ethnicity != "All, All Origins"  & rural_urban_classI == rural_urban_class 
+                                              & measure3 =="proportion of disparity to Black or African American attributable"
+                                              #& measure3 =="proportion of disparity to average"
+                                              )
         attrBurden4 <- attrBurden4 %>% filter(Education == 666 & Ethnicity != "All, All Origins" & rural_urban_classI == rural_urban_class)
         pm_summ1 <- pm_summ1 %>% filter(Education == 666 & Ethnicity != "All, All Origins" & rural_urban_classI == rural_urban_class)
         pop_summary1 <- pop_summary1 %>% filter(Education == 666 & Ethnicity != "All, All Origins" & rural_urban_classI == rural_urban_class)
@@ -268,7 +271,7 @@ shinyApp(
         g4 <- g4 + geom_ribbon(aes(ymin = lower, ymax = upper), linetype = 0, alpha = 0.1)
       }
       
-      #if(FALSE){ #TODO
+      if(input$raceOrEduc != "nothing"){ #TODO
         g1 <- g1+  scale_colour_manual(values=group.colors)
         g2 <- g2+  scale_colour_manual(values=group.colors)
         g3 <- g3+  scale_colour_manual(values=group.colors)
@@ -277,7 +280,7 @@ shinyApp(
         g6 <- g6+  scale_colour_manual(values=group.colors)
         g7 <- g7+  scale_colour_manual(values=group.colors)
         g8 <- g8+  scale_colour_manual(values=group.colors)
-      #}
+      }
       
       g_comb <- ggarrange(g1, #g2, 
                           g3, g4, g5, g6, g7,#g8,
